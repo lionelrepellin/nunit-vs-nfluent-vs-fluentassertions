@@ -57,8 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="ServiceToBeTested.cs" />
+    <Compile Include="BaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestWithFluentAssertions.cs" />
+    <Compile Include="TestWithNfluent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
