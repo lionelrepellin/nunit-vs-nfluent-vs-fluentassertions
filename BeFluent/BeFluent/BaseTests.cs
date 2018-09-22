@@ -25,5 +25,6 @@ namespace BeFluent
 		public abstract void Enum();
 		public abstract void CodePerformance();
 		public abstract void CompareObject();
+		public abstract void Asynchronous();
 	}
 }

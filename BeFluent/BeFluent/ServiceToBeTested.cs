@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace BeFluent
 			return "Hello World!";
 		}
 
-		public int GetInputValue(string input)
+		public int ConvertStringToInt(string input)
 		{
 			return int.Parse(input);
 		}
@@ -42,14 +43,17 @@ namespace BeFluent
 			return _people;
 		}
 
-		public IEnumerable<string> GetNames()
-		{
-			return _people.Select(p => p.Name);
-		}
-
 		public void DoSomeWorkAndSleep500ms()
 		{
 			Thread.Sleep(500);
+		}
+
+		public async Task<string> GetHtmlAsync()
+		{
+			using (var client = new HttpClient())
+			{
+				return await client.GetStringAsync("http://www.google.fr");
+			}
 		}
 	}
 

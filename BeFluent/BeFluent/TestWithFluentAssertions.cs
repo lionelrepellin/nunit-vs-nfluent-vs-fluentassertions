@@ -3,11 +3,40 @@ using FluentAssertions;
 using System;
 using System.Linq;
 using FluentAssertions.Extensions;
+using System.Threading.Tasks;
 
 namespace BeFluent
 {
 	public class TestWithFluentAssertions : BaseTests
 	{
+		[Test]
+		public override void Asynchronous()
+		{
+			Func<Task> f = async () => { await Service.GetHtmlAsync(); };
+			f.Should().NotThrow(); // it seems to be a bit limited
+		}
+
+		[Test]
+		public override void CodePerformance()
+		{
+			// more accurate than Nfluent => it works!
+			Service.ExecutionTimeOf(s => s.DoSomeWorkAndSleep500ms()).Should().BeLessOrEqualTo(600.Milliseconds());
+		}
+
+		[Test]
+		public override void CompareObject()
+		{
+			var person = Service.GetPersons().First(p => p.Nationality == Nationality.Indian);
+
+			var anotherPerson = new Person
+			{
+				Name = "Arjun",
+				Nationality = Nationality.Indian
+			};
+
+			person.Should().BeEquivalentTo(anotherPerson, options => options.Excluding(x => x.Age).Excluding(x => x.Id));
+		}
+
 		[Test]
 		public override void ContainsValue()
 		{
@@ -43,13 +72,13 @@ namespace BeFluent
 				.WithMessage("No argument?");
 			
 			Service.Invoking(s => s.ThrowException())
-			.Should().Throw<ArgumentException>()
-			.Where(e => e.Message.StartsWith("No"));
+				.Should().Throw<ArgumentException>()
+				.Where(e => e.Message.StartsWith("No"));
 
 			Service.Invoking(s => s.ThrowException())
-			.Should().Throw<ArgumentException>()
-			.And
-			.Message.Should().Be("No argument?");
+				.Should().Throw<ArgumentException>()
+				.And
+				.Message.Should().Be("No argument?");
 		}
 
 		[Test]
@@ -58,34 +87,29 @@ namespace BeFluent
 			var firstPerson = Service.GetPersons().First();
 
 			firstPerson.Should().BeOfType<Person>();
-			firstPerson.Should().BeOfType(typeof(Person));
-		}
+			firstPerson.Should().BeOfType(typeof(Person)); 
 
-		[Test]
-		public override void CompareObject()
-		{
-			var person = Service.GetPersons().First(p => p.Nationality == Nationality.Indian);
+			// parent class
+			firstPerson.Should().BeAssignableTo<Human>();
 
-			var anotherPerson = new Person
-			{
-				Name = "Arjun",
-				Nationality = Nationality.Indian
-			};
-			
-			person.Should().BeEquivalentTo(anotherPerson, options => options.Excluding(x => x.Age).Excluding(x => x.Id));
+			typeof(Human).Should().BeAbstract();
 		}
 
 		[Test]
 		public override void IsEqual()
 		{
-			var oldestPerson = Service.GetPersons().OrderByDescending(p => p.Age).First();
+			const int expectedValue = 38;
 
-			oldestPerson.Age.Should()
+			var value = Service.ConvertStringToInt("38");
+
+			value.Should()
 				.BePositive()
 				.And
-				.BeGreaterOrEqualTo(38)
+				.BeGreaterOrEqualTo(37)
 				.And
-				.BeInRange(30, 40);
+				.BeInRange(30, 40)
+				.And
+				.Be(expectedValue);
 		}
 
 		[Test]
@@ -108,14 +132,6 @@ namespace BeFluent
 		}
 
 		[Test]
-		public void TestFloatValue()
-		{
-			float pi = 3.1415927F;
-
-			pi.Should().BeApproximately(3.14F, 0.01F);
-		}
-
-		[Test]
 		public override void IsNull()
 		{
 			var result = Service.GetNullValue();
@@ -123,12 +139,17 @@ namespace BeFluent
 			result.Should().BeNull();
 		}
 
+		#region FluentAssertions specific
+
 		[Test]
-		public override void CodePerformance()
+		public void _FloatValue()
 		{
-			// more accurate than Nfluent => it works!
-			Service.ExecutionTimeOf(s => s.DoSomeWorkAndSleep500ms()).Should().BeLessOrEqualTo(600.Milliseconds());
+			float pi = 3.1415927F;
+
+			pi.Should().BeApproximately(3.14F, 0.01F);
 		}
+
+		#endregion
 	}
 
 }
